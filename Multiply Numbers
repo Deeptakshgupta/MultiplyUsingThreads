@@ -1,0 +1,49 @@
+// Multiply numbers using threads
+// using long here but need to update to bigInteger for large values
+// hardcoded thread pool to 4 according to requirement but can update it
+// while actual implememntaiton
+
+import java.util.concurrent.RecursiveTask;
+import java.util.concurrent.ForkJoinPool;
+
+public class MultiplyTask extends RecursiveTask<Long> {
+    private final int start;
+    private final int end;
+
+    public MultiplyTask(int start, int end) {
+        this.start = start;
+        this.end = end;
+    }
+
+    @Override
+    protected Long compute() {
+        if (end - start <= 250) { // Base case: if the range is small enough, compute directly
+            long product = 1;
+            for (int i = start; i <= end; i++) {
+                product *= i;
+            }
+            return product;
+        } else {
+            // Split the task into two subtasks
+            int mid = (start + end) / 2;
+            MultiplyTask leftTask = new MultiplyTask(start, mid);
+            MultiplyTask rightTask = new MultiplyTask(mid + 1, end);
+            
+            // Fork the left task
+            leftTask.fork();
+            // Compute the right task
+            long rightResult = rightTask.compute();
+            // Join the left task result
+            long leftResult = leftTask.join();
+            
+            return leftResult * rightResult; // Combine results
+        }
+    }
+
+    public static void main(String[] args) {
+        ForkJoinPool pool = new ForkJoinPool(4); // Create a ForkJoinPool with 4 threads
+        MultiplyTask task = new MultiplyTask(1, 1000); // Create the task for numbers 1 to 1000
+        long result = pool.invoke(task); // Invoke the task
+        System.out.println("Product of numbers from 1 to 1000: " + result);
+    }
+}
