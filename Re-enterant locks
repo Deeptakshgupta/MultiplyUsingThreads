@@ -32,7 +32,8 @@ public class IncrementCounter {
 	
 	public static void attemptLock() {
         // Try to acquire the lock without blocking
-        if (lock.tryLock()) {
+        if (lock.tryLock()) {   // here we didn't provide the time till when the thread should try to get the lock
+// in this case program will never get executed
             try {
                 System.out.println("Lock acquired successfully by:"+Thread.currentThread().getName());
                 // Simulate some work
@@ -58,4 +59,35 @@ public class IncrementCounter {
 		executor.submit(() -> attemptLock());
 		executor.submit(() -> attemptLock());
 	}
+}
+
+/***************************************************************************************************************************/
+
+package counter;
+
+
+import java.util.concurrent.locks.ReentrantLock;
+
+public class IncrementCounter {
+
+	private static ReentrantLock fairLock = new ReentrantLock(true); // Fair lock
+
+    public static void task() {
+        fairLock.lock(); // Acquire the lock
+        try {
+            System.out.println(Thread.currentThread().getName() + " is working.");
+        } finally {
+            fairLock.unlock(); // Release the lock
+        }
+    }
+
+    public static void main(String[] args) {
+        Thread thread1 = new Thread(IncrementCounter::task);
+        Thread thread2 = new Thread(IncrementCounter::task);
+        Thread thread3 = new Thread(IncrementCounter::task);
+
+        thread1.start();
+        thread2.start();
+        thread3.start();
+    }
 }
