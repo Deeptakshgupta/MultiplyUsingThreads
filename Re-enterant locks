@@ -8,6 +8,9 @@ import java.util.concurrent.locks.ReentrantLock;
 public class IncrementCounter {
 
 	private static ReentrantLock lock = new ReentrantLock();
+//Fair Lock
+//     	private static ReentrantLock lock = new ReentrantLock(true);
+
 	private static int counter = 0;
 
 	private static void incrementCounter() {
